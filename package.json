@@ -1,0 +1,28 @@
+{
+  "name": "wx_spider_offline",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lx1025/wx_spider_offline.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lx1025/wx_spider_offline/issues"
+  },
+  "homepage": "https://github.com/lx1025/wx_spider_offline#readme",
+  "dependencies": {
+    "anyproxy": "^4.0.10",
+    "cheerio": "^1.0.0-rc.2",
+    "child_process": "^1.0.2",
+    "fs": "0.0.1-security",
+    "moment": "^2.22.2",
+    "path": "^0.12.7",
+    "url": "^0.11.0"
+  }
+}
