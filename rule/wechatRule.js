@@ -43,7 +43,7 @@ const getReadAndLikeNum = async function(ctx) {
 };
 
 
-const hanleGzhArticel = async function (ctx) {
+const handleArticel = async function (ctx) {
 
 };
 
