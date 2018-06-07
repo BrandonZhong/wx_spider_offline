@@ -1,15 +1,59 @@
 'use strict';
 
 const url = require('url');
-const moment = require('moment');
+let request = require('async-request'), response;
 const { log } = console;
 const config = require('../config');
 const cheerio = require('cheerio');
+
+
+function getTarget(regexp, body) {
+  let target;
+  body.replace(regexp, (_, t) => {
+    target = t;
+  });
+  return target;
+
+}
+
+async function getNextArticleLink() {
+  const url = 'http://1.119.144.204:8912/article/link';
+  response = await request(url);
+  const body = response.body.toString();
+  const data = JSON.parse(body);
+  return data.link;
+}
+
+async function postReadAndLikeNum(readNum, likeNum) {
+  const url = 'http://1.119.144.204:8912/article/readlike';
+  var options = {
+    method: 'POST',
+    data: {
+      read_num: readNum,
+      like_num: likeNum
+    }
+  };
+  response = await request(url, options);
+  const body = response.body.toString();
+  const data = JSON.parse(body);
+  return data
+}
+
+//-------------------------------
 
 const isReadAndLikeNum = function (ctx) {
   const { req } = ctx;
   const link = req.url;
   if (!/mp\/getappmsgext/.test(link)) return false;
+  return true;
+};
+
+const isArticle = function (ctx) {
+  const { req } = ctx;
+  const link = req.url;
+  const isPost = /mp\.weixin\.qq\.com\/s\?__biz/.test(link);
+  const isOldPost = /mp\/appmsg\/show/.test(link);
+  if (!(isPost || isOldPost)) return false;
   return true;
 };
 
@@ -31,35 +75,12 @@ const handleReadAndLikeNum = async function (ctx) {
     }, {});
     const { __biz, mid, idx } = reqObj;
     const [msgBiz, msgMid, msgIdx] = [__biz, mid, idx];
-    log(msgBiz, msgMid, msgIdx);
     log(readNum, likeNum);
+    await postReadAndLikeNum(readNum, likeNum)
   } catch(e) {
     throw e;
   }
 };
-
-const isArticle = function (ctx) {
-  const { req } = ctx;
-  const link = req.url;
-  const isPost = /mp\.weixin\.qq\.com\/s\?__biz/.test(link);
-  const isOldPost = /mp\/appmsg\/show/.test(link);
-  if (!(isPost || isOldPost)) return false;
-  return true;
-};
-function getTarget(regexp, body) {
-  let target;
-  body.replace(regexp, (_, t) => {
-    target = t;
-  });
-  return target;
-
-}
-
-function getNextArticleLink() {
-  const apiUrl = '';
-
-
-}
 
 const handleArticle = async function (ctx) {
   const { req, res } = ctx;
@@ -70,11 +91,20 @@ const handleArticle = async function (ctx) {
   const { query } = urlObj;
   const { __biz, mid, idx } = query;
   const [msgBiz, msgMid, msgIdx] = [__biz, mid, idx];
-
+  log(msgBiz, msgMid, msgIdx);
+  const nextLink = await getNextArticleLink();
+  if (!nextLink) return;
   const insertJsStr = '<meta http-equiv="refresh" content="' + config.insertJsToNextPage.jumpInterval + ';url=' + nextLink + '" />';
   body = body.replace('</title>', '</title>' + insertJsStr);
 
   return {
     response: { ...res.response, body }
   };
+};
+
+module.exports = {
+  isReadAndLikeNum,
+  isArticle,
+  handleReadAndLikeNum,
+  handleArticle
 };

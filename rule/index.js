@@ -1,14 +1,11 @@
 'use strict';
 
 const {
-  getReadAndLikeNum,
-  getPostBasicInfo,
-  handlePostHtml,
-  getComments,
-  getProfileBasicInfo,
-  getPostList,
-  handleProfileHtml
-} = require('./wechatRule');
+  isReadAndLikeNum,
+  isArticle,
+  handleReadAndLikeNum,
+  handleArticle
+} = require('./handle');
 const config = require('../config');
 const fs = require('fs');
 const path = require('path');
@@ -16,16 +13,6 @@ const path = require('path');
 const { isReplaceImg } = config;
 let imgBuf;
 if (isReplaceImg) imgBuf = fs.readFileSync(path.join(__dirname, './replaceImg.png'));
-
-const sendResFns = [
-  getReadAndLikeNum,
-  getPostBasicInfo,
-  handlePostHtml,
-  getComments,
-  getProfileBasicInfo,
-  getPostList,
-  handleProfileHtml
-];
 
 const rule = {
   // 模块介绍
@@ -51,22 +38,13 @@ const rule = {
 
   // 发送响应前处理
   *beforeSendResponse(requestDetail, responseDetail) {
-    const fnLens = sendResFns.length;
-    if (fnLens === 0) return;
-    let i = 0;
+    // const fnLens = sendResFns.length;
+    // if (fnLens === 0) return;
     const ctx = { req: requestDetail, res: responseDetail };
-    const handleFn = () => {
-      const fn = sendResFns[i];
-      return fn(ctx).then(res => {
-        if (res) return res;
-        i += 1;
-        if (i >= fnLens) return;
-        return handleFn();
-      });
-    };
-    return handleFn().catch(e => {
-      throw e;
-    });
+
+    if (isArticle(ctx)) return handleArticle(ctx);
+    if (isReadAndLikeNum(ctx)) return handleReadAndLikeNum(ctx);
+    return null;
   }
 
   // 是否处理https请求 已全局开启解析https请求 此处注释掉即可

@@ -18,11 +18,14 @@
   "homepage": "https://github.com/lx1025/wx_spider_offline#readme",
   "dependencies": {
     "anyproxy": "^4.0.10",
+    "async-request": "^1.2.0",
     "cheerio": "^1.0.0-rc.2",
     "child_process": "^1.0.2",
     "fs": "0.0.1-security",
     "moment": "^2.22.2",
+    "npm": "^6.1.0",
     "path": "^0.12.7",
+    "request": "^2.87.0",
     "url": "^0.11.0"
   }
 }
